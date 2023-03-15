@@ -1,5 +1,8 @@
 from mathutils import Vector
+import numpy as np
 import bpy
+from random import choice, randint
+import math
 
 
 def camera_as_planes(scene, obj):
@@ -125,3 +128,23 @@ def select_objects_in_camera():
 
     return set(objects_in_view)
 
+
+def l2(obj):
+    return round(np.sqrt((obj.location.x - bpy.data.objects['Camera'].location.x) ** 2 + (obj.location.y - bpy.data.objects['Camera'].location.y) ** 2 + (obj.location.z - bpy.data.objects['Camera'].location.z) ** 2), ndigits=0)
+
+
+def relocate_objects(objects_to_move, low_x, low_y, grid, colors_list):
+
+    for j, object in enumerate(objects_to_move):
+
+        # x and y are swapped in blender
+        object.location.x = low_x + grid[j][1]
+        object.location.y = low_y + grid[j][0]
+
+        if object in list(bpy.data.collections['move_and_change_color'].objects):
+            color = choice(list(colors_list.keys()))
+            # rotate only in Oxy
+            object.rotation_euler[2] = randint(0, 360) / 180 * math.pi
+            object.active_material.node_tree.nodes['Principled BSDF'].inputs["Base Color"].default_value = color
+        else:
+            object.rotation_euler[2] = randint(0, 360) / 180 * math.pi

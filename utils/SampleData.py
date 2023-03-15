@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from json import dumps, load
 
 
 class Bbox(BaseModel):
@@ -18,3 +19,17 @@ class ImageBboxes(BaseModel):
 
 class SampleData(BaseModel):
     ImageBboxes: list[ImageBboxes]
+
+
+def read_json(bboxes_file_path, already_rendered_num):
+    with open(bboxes_file_path, "r+") as file:
+
+        if already_rendered_num == 0:
+            ls_im_bboxes = []
+            file.close()
+        else:
+            datax = load(file)
+            ls_im_bboxes = SampleData(**datax).ImageBboxes
+            file.close()
+
+    return ls_im_bboxes

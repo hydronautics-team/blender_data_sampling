@@ -1,0 +1,30 @@
+---
+render_settings:
+
+  NAME: 'teknofest'
+
+  DRAW_BBOXES: True
+  RENDERING: True
+  IMAGE_WIDTH: 640
+  IMAGE_HEIGHT: 480
+  NUM_IMAGES: 1
+  NUM_SAMPLES: 3
+  MIST: False
+
+shapes:
+  'round': 'circle'
+  'round2': 'circle'
+  'sqr': 'square'
+  'triu': 'triangle'
+  'circle1': 'hoop'
+  'circle2': 'hoop'
+  'gate': 'gate'
+  'TARGET': 'Target circle'
+  
+colors:
+  !!python/tuple [0, 0.8, 0.8, 1]: cian
+  !!python/tuple [0.8, 0, 0.8, 1]: purple
+  !!python/tuple [0.8, 0.8, 0, 1]: yellow
+  !!python/tuple [0.1, 0, 0.8, 1]: blue
+  !!python/tuple [0, 0.8, 0, 1]: green
+...
