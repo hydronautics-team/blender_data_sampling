@@ -1,0 +1,78 @@
+scene:
+  scene_file: sauvc_2026.blend
+  camera_name: Camera
+  bounds:
+    object_name: pool_bounds
+    xy_padding: 3
+    z_padding: 0.55
+  movable_collections:
+    - move_and_change_color
+    - only_move
+  recolor_collection: move_and_change_color
+  recolor_material_node: Principled BSDF
+  recolor_material_input: Base Color
+  wall_color:
+    object_name: pool_bounds
+    hsv:
+      h: [0.48, 0.58]
+      s: [0.45, 0.85]
+      v: [0.45, 0.75]
+  surface_hsv_adjustments:
+    - object_name: pool_bounds
+      node_name: Hue Saturation Value
+      hue_input: 0
+      hue_range: [0.45, 0.53]
+      saturation_input: 1
+      saturation_range: [1.0, 1.8]
+      value_input: 2
+      value_range: [0.8, 1.6]
+  lights:
+    collection_name: lights
+    reference_light_names: []
+    energy_range: [75000, 175000]
+    rotation_z_deg_range: [0.0, 360.0]
+
+dataset:
+  classes:
+    - gate
+    - buoy
+    - torpedo_target
+    - bin
+    - marker
+  object_type_by_name:
+    gate_main: gate
+    buoy_red: buoy
+    torpedo_board: torpedo_target
+    bin_frame: bin
+    lane_marker: marker
+
+render:
+  image_width: 1280
+  image_height: 720
+  cycles_samples: 32
+  draw_debug_bboxes: false
+
+sampling:
+  num_images: 100
+  seed: 42
+  max_camera_attempts: 500
+  min_objects_in_view: 3
+  min_valid_bboxes: 2
+  min_bbox_width_px: 24
+  min_bbox_height_px: 12
+  min_camera_distance: 1.5
+
+randomization:
+  object_colors:
+    - [0.9, 0.2, 0.2, 1.0]
+    - [0.2, 0.8, 0.8, 1.0]
+    - [0.9, 0.9, 0.2, 1.0]
+
+visibility:
+  mode: geometric
+
+export:
+  format: yolo_bbox
+  val_size: 0.15
+  test_size: 0.15
+  image_prefix: img

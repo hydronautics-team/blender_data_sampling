@@ -1,3 +1,5 @@
+blender
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -129,3 +131,5 @@ dmypy.json
 .idea
 # Pyre type checker
 .pyre/
+exports/
+uv.lock
