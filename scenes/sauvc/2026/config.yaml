@@ -50,7 +50,6 @@ render:
   image_width: 1280
   image_height: 720
   cycles_samples: 32
-  draw_debug_bboxes: false
 
 sampling:
   num_images: 100

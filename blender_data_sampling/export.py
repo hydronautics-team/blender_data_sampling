@@ -59,11 +59,10 @@ def _draw_debug_image(source_path: Path, target_path: Path, sample) -> None:
     cv2.imwrite(str(target_path), image)
 
 
-def export_yolo_dataset(export_dir: Path, manifest: GenerationManifest, val_size: float, test_size: float, draw_debug_bboxes: bool) -> GenerationManifest:
+def export_yolo_dataset(export_dir: Path, manifest: GenerationManifest, val_size: float, test_size: float, overlay_images: bool) -> GenerationManifest:
     raw_dir = export_dir / "raw"
     images_dir = ensure_directory(export_dir / "images")
     labels_dir = ensure_directory(export_dir / "labels")
-    debug_dir = ensure_directory(export_dir / "debug") if draw_debug_bboxes else None
 
     split_samples = _split_samples(manifest.samples, val_size=val_size, test_size=test_size, seed=manifest.seed)
     class_to_index = {name: index for index, name in enumerate(manifest.classes)}
@@ -73,7 +72,6 @@ def export_yolo_dataset(export_dir: Path, manifest: GenerationManifest, val_size
         split_counts[split_name] = len(samples)
         split_images_dir = ensure_directory(images_dir / split_name)
         split_labels_dir = ensure_directory(labels_dir / split_name)
-        split_debug_dir = ensure_directory(debug_dir / split_name) if debug_dir else None
 
         for sample in samples:
             sample.split = split_name
@@ -81,8 +79,8 @@ def export_yolo_dataset(export_dir: Path, manifest: GenerationManifest, val_size
             target_image = split_images_dir / sample.image_filename
             shutil.move(str(source_image), str(target_image))
             _write_label_file(split_labels_dir / f"{Path(sample.image_filename).stem}.txt", class_to_index, sample)
-            if split_debug_dir is not None:
-                _draw_debug_image(target_image, split_debug_dir / sample.image_filename, sample)
+            if overlay_images:
+                _draw_debug_image(target_image, target_image, sample)
 
     dataset_yaml = {
         "path": str(export_dir.resolve()),

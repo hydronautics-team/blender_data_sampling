@@ -337,6 +337,7 @@ def run_generation(context: dict[str, Any]) -> GenerationManifest:
         )
 
     manifest = GenerationManifest(
+        run_mode=context.get("run_mode", "run"),
         competition=context["competition"],
         year=context["year"],
         config_path=context["config_path"],

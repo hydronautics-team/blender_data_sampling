@@ -7,7 +7,7 @@
 ## Что изменилось
 
 - единая точка входа: [main.py](main.py)
-- один CLI-командный сценарий: `run`
+- два CLI-сценария: `run` и `debug`
 - профили сцен лежат в [scenes](scenes)
 - старый `pipenv`-flow удалён, проект теперь описан через [pyproject.toml](pyproject.toml)
 - экспорт аннотаций сейчас поддерживает только `YOLO bbox`
@@ -74,6 +74,14 @@ uv run python main.py run \
   --config scenes/teknofest/2024/config.yaml
 ```
 
+Тестовый debug-запуск с bbox прямо на изображениях:
+
+```bash
+uv run python main.py debug \
+  --blender /path/to/blender \
+  --config scenes/teknofest/2024/config.yaml
+```
+
 Что делает `main.py`:
 
 1. Валидирует путь `scenes/<competition>/<year>/config.yaml`
@@ -85,10 +93,11 @@ uv run python main.py run \
 
 ## CLI
 
-Поддерживается одна команда:
+Поддерживаются две команды:
 
 ```bash
 python main.py run --blender <path-to-blender> --config <path-to-config>
+python main.py debug --blender <path-to-blender> --config <path-to-config>
 ```
 
 Аргументы:
@@ -96,13 +105,18 @@ python main.py run --blender <path-to-blender> --config <path-to-config>
 - `--blender` — абсолютный путь до Blender executable
 - `--config` — путь до `scenes/<competition>/<year>/config.yaml`
 
+Режимы:
+
+- `run` — обычный production export без нарисованных bbox
+- `debug` — тестовый export на `20` изображений с bbox, нарисованными прямо в `images/`
+
 ## Конфиг
 
 Ключевые секции YAML:
 
 - `scene` — имена объектов, коллекций, материалов, нод и относительный путь до `.blend`
 - `dataset` — список классов и отображение `object_name -> class_name`
-- `render` — размер изображения, Cycles samples, debug bbox preview
+- `render` — размер изображения и Cycles samples
 - `sampling` — число кадров, seed, лимиты и пороги валидации bbox
 - `randomization` — палитра цветов для recolorable объектов
 - `visibility` — `geometric` или `mist_model`
@@ -127,10 +141,16 @@ Runtime сначала пытается собрать кадр через targe
 
 ## Выходные данные
 
-Каждый запуск пишет результат в:
+Обычный запуск пишет результат в:
 
 ```text
 exports/<competition>_<year>_<timestamp>/
+```
+
+Debug-запуск пишет результат в:
+
+```text
+exports/debug/<competition>_<year>_<timestamp>/
 ```
 
 Внутри:
@@ -146,8 +166,9 @@ labels/
   train/
   val/
   test/
-debug/              # только если включён draw_debug_bboxes
 ```
+
+В `debug` режиме bbox рисуются прямо в `images/train|val|test`.
 
 Имена изображений:
 

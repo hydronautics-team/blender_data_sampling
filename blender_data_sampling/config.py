@@ -106,7 +106,6 @@ class RenderConfig(StrictModel):
     image_width: int
     image_height: int
     cycles_samples: int
-    draw_debug_bboxes: bool = False
 
 
 class SamplingConfig(StrictModel):
@@ -176,6 +175,7 @@ class ProjectConfig(StrictModel):
 
 
 class RunContext(StrictModel):
+    run_mode: Literal["run", "debug"]
     competition: str
     year: str
     config_path: str
@@ -213,11 +213,19 @@ def derive_profile_metadata(config_path: Path) -> tuple[Path, str, str]:
     return profile_dir, competition, year
 
 
-def build_export_dir(repo_root: Path, competition: str, year: str) -> Path:
-    return ensure_directory(repo_root / "exports" / f"{competition}_{year}_{utc_timestamp_slug()}")
+def build_export_dir(repo_root: Path, competition: str, year: str, run_mode: Literal["run", "debug"]) -> Path:
+    exports_root = repo_root / "exports"
+    if run_mode == "debug":
+        exports_root = exports_root / "debug"
+    return ensure_directory(exports_root / f"{competition}_{year}_{utc_timestamp_slug()}")
 
 
-def resolve_runtime_context(config_path: Path, repo_root: Path) -> RunContext:
+def resolve_runtime_context(
+    config_path: Path,
+    repo_root: Path,
+    run_mode: Literal["run", "debug"] = "run",
+    num_images_override: int | None = None,
+) -> RunContext:
     resolved_config_path = config_path.resolve()
     profile_dir, competition, year = derive_profile_metadata(resolved_config_path)
     project_config = load_project_config(resolved_config_path)
@@ -228,7 +236,7 @@ def resolve_runtime_context(config_path: Path, repo_root: Path) -> RunContext:
     if not scene_file.is_file():
         raise FileNotFoundError(f"Scene file not found: {scene_file}")
 
-    export_dir = build_export_dir(repo_root, competition, year)
+    export_dir = build_export_dir(repo_root, competition, year, run_mode=run_mode)
 
     scene_payload = project_config.scene.model_dump(mode="json")
     if scene_payload.get("mist"):
@@ -238,7 +246,12 @@ def resolve_runtime_context(config_path: Path, repo_root: Path) -> RunContext:
         if mist_payload.get("scaler_path"):
             mist_payload["scaler_path"] = str((profile_dir / mist_payload["scaler_path"]).resolve())
 
+    sampling_payload = project_config.sampling.model_dump(mode="json")
+    if num_images_override is not None:
+        sampling_payload["num_images"] = num_images_override
+
     context = RunContext(
+        run_mode=run_mode,
         competition=competition,
         year=year,
         config_path=str(resolved_config_path),
@@ -248,7 +261,7 @@ def resolve_runtime_context(config_path: Path, repo_root: Path) -> RunContext:
         scene=scene_payload,
         dataset=project_config.dataset.model_dump(mode="json"),
         render=project_config.render.model_dump(mode="json"),
-        sampling=project_config.sampling.model_dump(mode="json"),
+        sampling=sampling_payload,
         randomization=project_config.randomization.model_dump(mode="json"),
         visibility=project_config.visibility.model_dump(mode="json"),
         export=project_config.export.model_dump(mode="json"),

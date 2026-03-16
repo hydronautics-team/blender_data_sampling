@@ -58,6 +58,7 @@ class GeneratedImage:
 
 @dataclass(slots=True)
 class GenerationManifest:
+    run_mode: str
     competition: str
     year: str
     config_path: str
@@ -71,6 +72,7 @@ class GenerationManifest:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "run_mode": self.run_mode,
             "competition": self.competition,
             "year": self.year,
             "config_path": self.config_path,
@@ -86,6 +88,7 @@ class GenerationManifest:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GenerationManifest":
         return cls(
+            run_mode=data.get("run_mode", "run"),
             competition=data["competition"],
             year=str(data["year"]),
             config_path=data["config_path"],
